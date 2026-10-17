@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dabslabs — typed decisions for AI agents</title>
+<meta name="description" content="A typed-decision layer for AI agents. One forward pass on a GPU, one structured answer, zero generated tokens.">
+<style>
+  :root { --ink:#14161a; --muted:#5b636e; --line:#e3e6ea; --accent:#1f4fd8; --bg:#ffffff; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased; }
+  .wrap { max-width:820px; margin:0 auto; padding:0 24px; }
+  header { border-bottom:1px solid var(--line); padding:28px 0 22px; }
+  .brand { font-weight:650; letter-spacing:-0.02em; font-size:19px; }
+  .brand span { color:var(--muted); font-weight:400; }
+  h1 { font-size:clamp(28px,5vw,44px); line-height:1.15; letter-spacing:-0.03em; margin:56px 0 18px; }
+  h1 em { font-style:normal; color:var(--accent); }
+  .lede { font-size:19px; color:var(--muted); max-width:62ch; margin:0 0 40px; }
+  h2 { font-size:14px; text-transform:uppercase; letter-spacing:0.09em; color:var(--muted);
+    margin:56px 0 16px; font-weight:600; }
+  p { max-width:66ch; }
+  .metrics { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:10px; overflow:hidden; margin:24px 0 8px; }
+  .metric { background:var(--bg); padding:20px 18px; }
+  .num { font-size:26px; font-weight:650; letter-spacing:-0.02em; }
+  .lbl { font-size:13px; color:var(--muted); margin-top:4px; }
+  .note { font-size:13px; color:var(--muted); max-width:70ch; }
+  ul { max-width:66ch; padding-left:20px; }
+  li { margin:7px 0; }
+  .callout { border-left:3px solid var(--accent); padding:2px 0 2px 16px; margin:28px 0; }
+  footer { border-top:1px solid var(--line); margin-top:72px; padding:26px 0 60px;
+    font-size:13px; color:var(--muted); display:flex; flex-wrap:wrap; gap:8px 22px; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+</style>
+</head>
+<body>
+<header><div class="wrap"><div class="brand">Dabslabs <span>— typed decisions</span></div></div></header>
+
+<main class="wrap">
+  <h1>Agents make decisions.<br>Stop making them <em>write</em> about it.</h1>
+  <p class="lede">An agent's tool loop is full of bounded questions: which tool, how severe, whether to escalate. Each has a small closed set of answers, yet each is sent to a chat model that decodes a paragraph and leaves the caller to parse it back into an enum. Detentra asks the question in a typed form and returns the answer in one forward pass.</p>
+
+  <div class="metrics">
+      <div class="metric"><div class="num">112 ms</div><div class="lbl">p50 door to decision</div></div>
+      <div class="metric"><div class="num">0</div><div class="lbl">output tokens per decision</div></div>
+      <div class="metric"><div class="num">31</div><div class="lbl">decision sites surveyed</div></div>
+  </div>
+  <p class="note">Measured on the development fleet over a five-call latency ladder, reported as a median with a 100 to 133 ms range, not a benchmark maximum. It is the full request path, including gateway and bridge overhead, not engine compute alone.</p>
+
+  <h2>The problem</h2>
+  <p>A decision whose answer is one label still costs a full generation: prompt in, sentence out, caller parses the sentence and hopes the model respected the enum. Latency pays for decoding that nobody reads, and every answer that drifts outside the allowed set is a runtime failure that has to be caught and retried.</p>
+
+  <h2>What it does</h2>
+  <p>The caller posts a typed question in one of three shapes: a choice over a known option set, a score on an ordered scale, or a boolean. A joint-head model served on NVIDIA GPUs scores every allowed option in a single forward pass and returns the chosen option with a probability attached to each candidate. Nothing is generated, so nothing is parsed, and an answer outside the option set is impossible by construction rather than by validation.</p>
+  <div class="callout"><p>Integration is shadow-first by design. A new site runs the incumbent and this layer side by side, records what the layer would have decided, and only earns the right to act once agreement, determinism, latency, and an error budget have all held over a shadow window.</p></div>
+
+  <h2>Who it is for</h2>
+  <ul>
+      <li>Agent platforms routing tool calls across dozens of providers, where tool selection is a bounded choice made thousands of times an hour.</li>
+      <li>Operations and reliability teams triaging alerts, where the decision is a class and a severity, not prose.</li>
+      <li>Any pipeline gating expensive work behind a small decision, where the gate matters more than the explanation.</li>
+  </ul>
+
+  <h2>Where this actually stands</h2>
+  <p>This is an early-stage software company: pre-revenue, one operator, no customers, and no claims of traction. The layer is deployed in shadow on five applications of the operator's own estate, where it computes decisions and records them while nothing acts on them. No acting gate has been switched on anywhere. The survey counted 31 bounded decision sites across 16 consumer surfaces; five are instrumented, none is acting. That distinction is deliberate and it is reported here rather than smoothed over.</p>
+
+  <h2>What it is not</h2>
+  <ul>
+      <li>Not a consultancy or a build-for-hire shop. This sells a software layer, and no services, staffing, or advisory work is offered.</li>
+      <li>Not a cloud, a GPU host, or a capacity provider. The fleet is the company's own development and inference environment; no compute is sold or offered to anyone.</li>
+  </ul>
+
+  <h2>Provenance</h2>
+  <p>The engineering method behind this product is documented in public, in the founder's own voice: measurements, failures, and the reasoning that produced them.</p>
+  <ul>
+      <li><a href="https://overlabbed.com/agentic-operations-the-journey-starts-here/">Agentic Operations: The Journey Starts Here</a></li>
+      <li><a href="https://overlabbed.com/goal-catalogue-2026-10-16/">Codify two ad-hoc browser-automation job-application runs into one reusable, replay-validated skill</a></li>
+      <li><a href="https://overlabbed.com/goal-58a7c087-catalogue/">Why an overnight critical alert produced visible RCA activity but no remediation action</a></li>
+  </ul>
+
+  <h2>Contact</h2>
+  <p><a href="mailto:todd@dabslabs.ai">todd@dabslabs.ai</a></p>
+</main>
+
+<footer class="wrap">
+  <span>Dabslabs LLC &middot; California, United States</span>
+  <span>&copy; 2026</span>
+</footer>
+</body>
+</html>
