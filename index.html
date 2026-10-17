@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Dabslabs — typed decisions for AI agents</title>
-<meta name="description" content="A typed-decision layer for AI agents. One forward pass on a GPU, one structured answer, zero generated tokens.">
+<title>Dabslabs — the verified web behind the music</title>
+<meta name="description" content="Invisible Strings: a provenance-first music-lore platform. Every connection between songs, artists, and stories carries its source and a confidence score. Starting with Taylor Swift, built for every artist after her.">
 <style>
   :root { --ink:#14161a; --muted:#5b636e; --line:#e3e6ea; --accent:#1f4fd8; --bg:#ffffff; }
   * { box-sizing:border-box; }
@@ -37,44 +37,45 @@
 </style>
 </head>
 <body>
-<header><div class="wrap"><div class="brand">Dabslabs <span>— typed decisions</span></div></div></header>
+<header><div class="wrap"><div class="brand">Dabslabs <span>— Invisible Strings</span></div></div></header>
 
 <main class="wrap">
-  <h1>Agents make decisions.<br>Stop making them <em>write</em> about it.</h1>
-  <p class="lede">An agent's tool loop is full of bounded questions: which tool, how severe, whether to escalate. Each has a small closed set of answers, yet each is sent to a chat model that decodes a paragraph and leaves the caller to parse it back into an enum. Detentra asks the question in a typed form and returns the answer in one forward pass.</p>
+  <h1>Every song has a story.<br>Every story has a <em>source</em>.</h1>
+  <p class="lede">Fans know things about music the industry never documents: which interview rewrote a lyric's meaning, which relationship shaped an album, which paper got it right. Invisible Strings turns scattered lore into a verified graph, where every connection carries its evidence.</p>
 
   <div class="metrics">
-      <div class="metric"><div class="num">112 ms</div><div class="lbl">p50 door to decision</div></div>
-      <div class="metric"><div class="num">0</div><div class="lbl">output tokens per decision</div></div>
-      <div class="metric"><div class="num">31</div><div class="lbl">decision sites surveyed</div></div>
+      <div class="metric"><div class="num">2</div><div class="lbl">GPU inference workloads in production</div></div>
+      <div class="metric"><div class="num">9</div><div class="lbl">production services running</div></div>
+      <div class="metric"><div class="num">1</div><div class="lbl">founding corpus — artist-agnostic by design</div></div>
   </div>
-  <p class="note">Measured on the development fleet over a five-call latency ladder, reported as a median with a 100 to 133 ms range, not a benchmark maximum. It is the full request path, including gateway and bridge overhead, not engine compute alone.</p>
+  <p class="note">Counts read from the live production cluster on 2026-10-17: a speech-recognition workload on an NVIDIA Jetson edge device and a claim-verification service on RTX-class GPUs, across a nine-service stack. The founding corpus is Taylor Swift's discography; the platform is built for every artist after her.</p>
 
   <h2>The problem</h2>
-  <p>A decision whose answer is one label still costs a full generation: prompt in, sentence out, caller parses the sentence and hopes the model respected the enum. Latency pays for decoding that nobody reads, and every answer that drifts outside the allowed set is a runtime failure that has to be caught and retried.</p>
+  <p>Music fandom is full of knowledge nobody can trust. The interview that explains the lyric, the ex behind the album, the academic paper that read it all correctly — scattered across forums, podcasts, and comment sections, asserted without evidence, and drowned in noise. Collecting it is the easy half. Knowing what matters is the product.</p>
 
   <h2>What it does</h2>
-  <p>The caller posts a typed question in one of three shapes: a choice over a known option set, a score on an ordered scale, or a boolean. A joint-head model served on NVIDIA GPUs scores every allowed option in a single forward pass and returns the chosen option with a probability attached to each candidate. Nothing is generated, so nothing is parsed, and an answer outside the option set is impossible by construction rather than by validation.</p>
-  <div class="callout"><p>Integration is shadow-first by design. A new site runs the incumbent and this layer side by side, records what the layer would have decided, and only earns the right to act once agreement, determinism, latency, and an error budget have all held over a shadow window.</p></div>
+  <p>Two equal pillars. The engine: audio transcribed with speech recognition on NVIDIA GPUs, relationships extracted between songs, people, places, and documents, every claim scored against its own cited source by a natural-language-inference service. What enters the graph is not what someone asserted; it is what survived checking. Discovery: the layer that decides what deserves the pipeline at all. A discovery decision is treated as a claim in its own right — a source earns its place by measured, verified contribution, and noise dies by provenance failure rather than popularity. The fan never sifts the firehose.</p>
+  <div class="callout"><p>Verification is never for sale, and confidence is never an opinion. Every confidence rating on the platform is the output of a model checking a claim against the source it cites — which is what separates a provenance graph from a fan wiki.</p></div>
 
   <h2>Who it is for</h2>
   <ul>
-      <li>Agent platforms routing tool calls across dozens of providers, where tool selection is a bounded choice made thousands of times an hour.</li>
-      <li>Operations and reliability teams triaging alerts, where the decision is a class and a severity, not prose.</li>
-      <li>Any pipeline gating expensive work behind a small decision, where the gate matters more than the explanation.</li>
+      <li>Fans of any artist, exploring the influences, histories, and relationships woven through the music they love.</li>
+      <li>Communities building theories together — submitting, corroborating, and challenging, with the platform tracking agreement against verified evidence.</li>
+      <li>Researchers and writers who need the story behind a song to come with its receipts.</li>
   </ul>
 
   <h2>Where this actually stands</h2>
-  <p>This is an early-stage software company: pre-revenue, one operator, no customers, and no claims of traction. The layer is deployed in shadow on five applications of the operator's own estate, where it computes decisions and records them while nothing acts on them. No acting gate has been switched on anywhere. The survey counted 31 bounded decision sites across 16 consumer surfaces; five are instrumented, none is acting. That distinction is deliberate and it is reported here rather than smoothed over.</p>
+  <p>This is an early-stage software company: pre-revenue, one operator, no employees, and no claims of traction. The engine runs today on the operator's own production cluster — sourcing, GPU transcription, claim verification, graph database, and web frontend, all deployed and monitored. The discovery layer is designed and is the next build. The platform is not yet publicly launched, and the founding corpus is still being built out. That is the honest position, stated here rather than smoothed over.</p>
 
   <h2>What it is not</h2>
   <ul>
-      <li>Not a consultancy or a build-for-hire shop. This sells a software layer, and no services, staffing, or advisory work is offered.</li>
-      <li>Not a cloud, a GPU host, or a capacity provider. The fleet is the company's own development and inference environment; no compute is sold or offered to anyone.</li>
+      <li>Not a consultancy or a build-for-hire shop. This sells a platform; no services, staffing, or advisory work is offered.</li>
+      <li>Not a cloud, a GPU host, or a capacity provider. The cluster is the company's own development and inference environment; no compute is sold or offered to anyone.</li>
+      <li>Not a fan site for one artist. Taylor Swift's discography is the founding corpus and the muse — the product is the platform and the capability, for fans of any artist.</li>
   </ul>
 
   <h2>Provenance</h2>
-  <p>The engineering method behind this product is documented in public, in the founder's own voice: measurements, failures, and the reasoning that produced them.</p>
+  <p>The engineering method behind this platform is documented in public, in the founder's own voice: measurements, failures, and the reasoning that produced them.</p>
   <ul>
       <li><a href="https://overlabbed.com/agentic-operations-the-journey-starts-here/">Agentic Operations: The Journey Starts Here</a></li>
       <li><a href="https://overlabbed.com/goal-catalogue-2026-10-16/">Codify two ad-hoc browser-automation job-application runs into one reusable, replay-validated skill</a></li>
